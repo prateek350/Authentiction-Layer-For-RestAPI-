@@ -1,0 +1,23 @@
+fastapi
+uvicorn 
+langchain
+langgraph
+bcrypt
+pydantic[email]
+python-multipart
+sqlalchemy
+openai
+asyncpg
+# pysopg2-binary
+logging
+pytest
+pytest-cov
+httpx
+locust
+passlib
+passlib[bcrypt]
+python-jose
+spacy
+dotenv
+sqlalchemy_utils
+cachetools
