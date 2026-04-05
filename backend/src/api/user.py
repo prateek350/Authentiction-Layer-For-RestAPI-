@@ -1,8 +1,9 @@
 """ Creating a api router for user related operations """
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.schemas.user import UserCreate, ShowUser
 from src.utils.user import create_new_user
-from src.logger import setup_logger
+from src.core.logger import setup_logger
 
 logger=setup_logger(__name__)
 
@@ -13,6 +14,8 @@ async def create_user_endpoint(user: UserCreate, db: AsyncSession):
     db: AsyncSession of the database
     Output
     User object after creating the user in the database"""
-    created_user=await (create_new_user(user, db))
+    created_user = await create_new_user(user, db)
     logger.info("User Creation: %s", f"User with email {user.email} created successfully.")
+    if hasattr(ShowUser, "model_validate"):
+        return ShowUser.model_validate(created_user, from_attributes=True)
     return ShowUser.from_orm(created_user)

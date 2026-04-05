@@ -1,8 +1,9 @@
 "Importing the essential libraries for authenticating and logging the user"""
-from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
-from fastapi import Depends, status, HTTPException, Request
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt
+
 from src.core.config import Settings
 from src.core.database import get_db
 from src.utils.login import get_user_by_email
@@ -31,15 +32,15 @@ async def login_for_access_token_endpoint(request: Request, form_data: OAuth2Pas
     if not user:
         logger.error("Error: %s", f"The email id or password doesn't match for username: {form_data.username}.")
         raise HTTPException( 
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
-            Status_code=status.HTTP_401_UNAUTHORIZED
         )
     reset_login_attempts(client_ip)
-    access_token=await (create_access_token(data={"sub":user.email})) 
-    logger.info("Token: %s", f"Token created successfully for (form data.username).")
+    access_token = await create_access_token(data={"sub": user.email})
+    logger.info("Token: %s", f"Token created successfully for {form_data.username}.")
     return {"access_token":access_token, "token_type": "bearer"}
 
-oauth2_scheme=OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 
 async def get_current_user(token: str=Depends (oauth2_scheme), db: AsyncSession=Depends(get_db)):
     """Creating a dependency which can be used for token validation
@@ -50,7 +51,7 @@ async def get_current_user(token: str=Depends (oauth2_scheme), db: AsyncSession=
     Authentication of the user to any function with this dependency"""
     credentials_exception=HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detall="Could not validate the credentials, Please login again."
+        detail="Could not validate the credentials. Please login again.",
     )
     try:
         payload=jwt.decode(token, Settings.SECRET_KEY, algorithms=[Settings.ALGORITHM])

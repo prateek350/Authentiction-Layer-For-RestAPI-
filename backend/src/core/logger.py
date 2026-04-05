@@ -7,6 +7,8 @@ def setup_logger(name):
     Output
     Returns a console and file logger for saving the logs"""
     logger =logging.getLogger(name)
+    if logger.handlers:
+        return logger
     logger.setLevel(logging.DEBUG) #Set the base logging level
     # Create handlers
     console_handler=  logging.StreamHandler()
@@ -17,7 +19,7 @@ def setup_logger(name):
     file_handler.setLevel(logging.DEBUG)
     
     #Create formatters and add them to handlers
-    formatter = logging.Formatter('%(asctime)s - %(name)s - X(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     console_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
     
